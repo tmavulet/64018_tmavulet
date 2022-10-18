@@ -1,0 +1,151 @@
+---
+title: "MIS 64018 - Assignment 3"
+author: "Tejasvini Mavuleti"
+date: "2022-10-15"
+output:
+  word_document: default
+  html_document: default
+---
+
+The Transportation Model
+
+Say the decision variables are as follows - 
+Xpw is the total number of AEDs shipped from plant (p) to warehouse (w)
+
+So, (p = A,B) and (w = 1,2,3)
+
+# 1 -  Objective function
+Z = 622(XA1) +614(XA2) +630(XA3) +641(XB1) +645(XB2) +649(XB3)
+
+      And the constraints are
+XA1+XA2+XA3 <= 100
+XB1+XB2+XB3 <= 120
+XA1+XB1 = 80
+XA2+XB2 = 60
+XA3+XB3= 70
+and Xpw >= 0
+
+# Use the lpSolveAPI to formulate this problem
+```{r}
+library(lpSolve)
+library(lpSolveAPI)
+```
+
+This linear programming problem has 5 constraints, 6 decision variables and the goal is to minimize the function
+```{r}
+lprec <- make.lp(5,6)
+
+# Set the objective function for the problem
+set.objfn(lprec, c(622,614,630,641,645,649))
+
+# set the direction towards minimum
+lp.control(lprec, sense = "min")
+```
+
+Now make sure you add all the constraints to solve the problem
+```{r}
+
+# Adding the constraint values to both the plants
+
+# Set the production capacity constraints
+set.row(lprec, 1, c(1,1,1), indices = c(1,2,3))
+set.row(lprec, 2, c(1,1,1), indices = c(4,5,6))
+
+# Set the warehouse demand constraints
+set.row(lprec, 3, c(1,1), indices = c(1,4))
+set.row(lprec, 4, c(1,1), indices = c(2,5))
+set.row(lprec, 5, c(1,1), indices = c(3,6))
+
+# Set the right hand side values ro the function
+rhs <- c(100,120,80,60,70)
+set.rhs(lprec, rhs)
+
+# Set the constraint type
+set.constr.type(lprec, c("<=","<=","=","=","="))
+```
+
+
+Make sure all the values are greater than 0 to minimize the problem correctly
+
+```{r}
+# Add the boundary conditions to the decision variables
+set.bounds(lprec, lower = rep(0, 6))
+
+# Naming all the rows (constraints) and columns (decision variables) for the problem
+
+lp.rownames <- c("Plant A Capacity", "Plant B Capacity", "W1 Demand", "W2 Demand", "W3 Demand")
+lp.colnames <- c("PlantA to W1", "PlantA to W2", "PlantA to W3", "PlantB to W1", "PlantB to W2", "PlantB to W3")
+
+dimnames(lprec) <- list(lp.rownames, lp.colnames)
+```
+
+
+```{r}
+# Now re-check the values of the problem 
+lprec
+```
+
+Now formulate the linear programming problem to find the optimal solution for both the plants A ans B. If the result says 0, then it the optimal solution.
+```{r}
+# Solve the linear program
+solve(lprec)
+```
+# The model returned a "0", so it has found an optimal solution to the problem.
+
+Now we fix a minimum value to the objective function 
+```{r}
+# The objective function value is
+get.objective(lprec)
+```
+# The minimum shipping and production costs is $132,790 with all the constraints fixed
+
+Now we add the decision variables to find the number of units that can be produced and shipped from both plants A and B.
+
+```{r}
+# Get the optimum decision variable values
+get.variables(lprec)
+```
+
+# Results
+Plant A ships 0 units to Warehouse 1, Plant A ships 60 units to Warehouse 2, Plant A ships 40 units to Warehouse 3, Plant B ships 80 units to Warehouse 1, Plant B ships 0 units to Warehouse 2, Plant B ships 30 units to Warehouse 3.
+
+This distribution can help minimize cost and maximize production of all the 210 units out of both the plants A and B.
+
+# 2 - Formulating the dual for this problem
+
+VA = Pi^d - Pi^0
+Max VA = (80p1^d +60p2^d+7op3^d)-(100p1^0-120p2^0)
+  Say for Plant A 
+  p1^d -p1^0 >=22
+  p2^d -p1^0 >=14
+  p3^d -p1^0 >=30
+  
+  For Plant B
+  p1^d -p2^o >=16
+  p2^d -p2^0 >=20
+  p3^d -p2^0 >=24
+  
+And for all non-negative variables we need pw^p >=0
+
+# 3 - Economic interpretation
+
+```{r}
+# Switch the matrix to calculate the dual
+costs <- matrix(c(622,614,630,0,
+ 641,645,649,0) , ncol=4 , byrow=TRUE)
+row.signs <- rep("<=",2)
+row.rhs <- c(100,120)
+
+col.signs <- rep(">=",4)
+col.rhs <- c(80,60,70,10)
+
+
+lptrans <- lp.transport(costs, "min", row.signs, row.rhs, col.signs, col.rhs)
+lptrans$duals
+```
+
+The economic interpretation of the dual problem is there is no solution. Here, we see that the shadow price is primal. The dual solution of this transportation model indicates that all the prices for the primal problem is "0". This says that there might be no scope of increasing the profit or decreasing the cost of reallocating the resources in plant A and b. Therefore, the feasible solution is that the marginal cost is the same as the marginal revenue. 
+
+          MR = MC 
+          And, the shadow price = 0 : No reallocation of resources. 
+  
