@@ -1,0 +1,208 @@
+---
+title: "MIS 64018 - Assignment 4"
+author: "Tejasvini Mavuleti"
+date: "2022-10-24"
+output: word_document
+---
+# Hope Valley Health Care Association
+
+Inputs -  Staffing Labor, Cost of Supplies
+Outputs -  No of patient-days reimbursed by third party, No of patient-days reimbursed privately 
+
+```{r}
+# First we start off by calling the Benchmarking package to run the DEA analysis. 
+require(Benchmarking)
+```
+
+Building a matrix to load the data 
+```{r}
+# Add the input variables to the matrix
+X <- matrix(c(150, 400, 320, 520, 350, 320, 0.2, 0.7, 1.2, 2.0, 1.2, 0.7), ncol = 2)
+
+# Add the output variables to the matrix
+Y <- matrix(c(14000, 14000, 42000, 28000, 19000, 14000, 3500, 21000, 10500, 42000, 25000, 15000), ncol = 2)
+
+# Name the columns as they were in the data set
+colnames(X) <- c("Staff Hours per Day","Supplies per Day")
+colnames(Y) <- c("Reimburse Patient-Days", "Privately Paid Patient-Days")
+
+# Review the data set in the matrix form
+print(X)
+print(Y)
+```
+# Solving Q1 and Q2 together 
+# Q1. - Formuulate and perform DEA analysis
+# Q2. - Determine the Peers and Lambdas under each of the above assumptions 
+
+```{r}
+# Formulating DEA analysis using FDH
+
+FDH <- rep("FDH", times = 6)
+Not_Applicable <- rep(NA, times = 6)
+DEA_FDH <- dea(X, Y, RTS = "FDH")
+DEA_FDH_Peers <- peers(DEA_FDH)                             
+DEA_FDH_Lambda <- lambda(DEA_FDH)  
+
+print(DEA_FDH)
+print(DEA_FDH_Peers)
+print(DEA_FDH_Lambda)
+
+dea.plot.isoquant(X, Y, RTS= "FDH")
+
+# Plot and summarize the results for the FDH assumption 
+
+DEA_FDH_Peers <- cbind(DEA_FDH_Peers, Not_Applicable, Not_Applicable)
+FDH_Summary <- cbind(FDH, DEA_FDH$eff, DEA_FDH_Peers, DEA_FDH_Lambda)
+colnames(FDH_Summary) <- c("Method","Eff", "P1", "P2", "P3", "L1", "L2", "L3", "L4", "L5", "L6")
+print(FDH_Summary)
+```
+
+
+
+```{r}
+# Formulating DEA analysis using CRS
+CRS <- rep("CRS", times = 6)
+DEA_CRS <- dea(X, Y, RTS = "CRS")
+DEA_CRS_Peers <- peers(DEA_CRS)                             
+DEA_CRS_Lambda <- lambda(DEA_CRS)
+
+print(DEA_CRS)
+print(DEA_CRS_Peers)
+print(DEA_CRS_Lambda)
+
+dea.plot.isoquant(X, Y, RTS= "CRS")
+
+#Plot and summarize the results for the CRS assumption 
+
+DEA_CRS_Lambda <- cbind(DEA_CRS_Lambda, Not_Applicable, Not_Applicable)
+CRS_Summary <- cbind(CRS, DEA_CRS$eff, DEA_CRS_Peers, DEA_CRS_Lambda)
+colnames(CRS_Summary) <- c("Method","Eff", "P1", "P2", "P3", "L1", "L2", "L3", "L4", "L5", "L6")
+CRS_Summary <- as.data.frame(CRS_Summary)
+CRS_Summary
+```
+
+
+```{r}
+# Formulating DEA analysis using VRS
+VRS <- rep("VRS", times = 6)
+DEA_VRS <- dea(X, Y, RTS = "VRS")
+DEA_VRS_Peers <- peers(DEA_VRS)                             
+DEA_VRS_Lambda <- lambda(DEA_VRS)
+
+print(DEA_VRS)
+print(DEA_VRS_Peers)
+print(DEA_VRS_Lambda)
+
+dea.plot.isoquant(X, Y, RTS= "VRS")
+
+# Plot and summarize the results for the VRS assumption 
+
+DEA_VRS_Lambda <- cbind(DEA_VRS_Lambda, Not_Applicable)
+VRS_Summary <- cbind(VRS, DEA_VRS$eff, DEA_VRS_Peers, DEA_VRS_Lambda)
+colnames(VRS_Summary) <- c("Method","Eff", "P1", "P2", "P3", "L1", "L2", "L3", "L4", "L5", "L6")
+VRS_Summary <- as.data.frame(VRS_Summary)
+VRS_Summary
+```
+
+
+```{r}
+# Formulating DEA analysis using IRS
+IRS <- rep("IRS", times = 6)
+DEA_IRS <- dea(X, Y, RTS = "IRS")
+DEA_IRS_Peers <- peers(DEA_IRS)                             
+DEA_IRS_Lambda <- lambda(DEA_IRS) 
+
+print(DEA_IRS)
+print(DEA_IRS_Peers)
+print(DEA_IRS_Lambda)
+
+dea.plot.isoquant(X, Y, RTS= "IRS")
+
+# Plot and summarize the results for the IRS assumption
+
+DEA_IRS_Lambda <- cbind(DEA_IRS_Lambda, Not_Applicable)
+IRS_Summary <- cbind(IRS, DEA_IRS$eff, DEA_IRS_Peers, DEA_IRS_Lambda)
+colnames(IRS_Summary) <- c("Method","Eff", "P1", "P2", "P3", "L1", "L2", "L3", "L4", "L5", "L6")
+IRS_Summary <- as.data.frame(IRS_Summary)
+IRS_Summary
+```
+
+
+```{r}
+# Formulating DEA analysis using DRS
+DRS <- rep("DRS", times = 6)
+DEA_DRS <- dea(X, Y, RTS = "DRS")
+DEA_DRS_Peers <- peers(DEA_DRS)                             
+DEA_DRS_Lambda <- lambda(DEA_DRS)
+
+print(DEA_DRS)
+print(DEA_DRS_Peers)
+print(DEA_DRS_Lambda)
+
+dea.plot.isoquant(X, Y, RTS= "DRS")
+
+# Plot and summarize the results for the DRS assumption
+
+DEA_DRS_Lambda <- cbind(DEA_DRS_Lambda, Not_Applicable, Not_Applicable)
+DRS_Summary <- cbind(DRS, DEA_DRS$eff, DEA_DRS_Peers, DEA_DRS_Lambda)
+colnames(DRS_Summary) <- c("Method","Eff", "P1", "P2", "P3", "L1", "L2", "L3", "L4", "L5", "L6")
+DRS_Summary <- as.data.frame(DRS_Summary)
+DRS_Summary
+```
+
+```{r}
+# Formulating DEA analysis using FRH or also called as ADD
+ADD <- rep("ADD", times = 6)
+DEA_ADD <- dea(X, Y, RTS = "ADD")
+DEA_ADD_Peers <- peers(DEA_ADD)                             
+DEA_ADD_Lambda <- lambda(DEA_ADD)
+
+print(DEA_ADD)
+print(DEA_ADD_Peers)
+print(DEA_ADD_Lambda)
+
+# Plot and summarize the results for the FRH/ADD assumption
+
+DEA_ADD_Peers <- cbind(DEA_ADD_Peers, Not_Applicable, Not_Applicable)
+ADD_Summary <- cbind(ADD, DEA_ADD$eff, DEA_ADD_Peers, DEA_ADD_Lambda)
+colnames(ADD_Summary) <- c("Method","Eff", "P1", "P2", "P3", "L1", "L2", "L3", "L4", "L5", "L6")
+ADD_Summary <- as.data.frame(ADD_Summary)
+ADD_Summary
+```
+
+# Q3. Summarize your results in a tabular format 
+```{r}
+# Summarizing all the results from every DEA assumption in a tabular form 
+summary_table <- rbind(FDH_Summary, CRS_Summary, VRS_Summary, IRS_Summary, DRS_Summary, ADD_Summary)
+print(summary_table)
+
+# creating an excel file
+library(rio)
+library(writexl)
+export(summary_table,"C:/Users/mavul/OneDrive/Documents/MIS 64018 - Assignment 4/64018-A4.xlsx")
+```
+
+# Q4. Compare and contrast the above results 
+In conclusion - 
+All the DEA assumptions estimate the technology by using a minimum extrapolation technique. What we learn here, is that the FDH is the smallest technology set and it gives out fewer outputs (no. of patient days reimbursed by third-party sources and no. of patient days reimbursed privately) with more inputs (no. of patient days reimbursed by third-party sources and no. of patient days reimbursed privately) (staffing labor and the cost of supplies). 
+
+Key takeaways - 
+- From the above results we saw that the FRH and FDH assumptions gave out efficiency with the value 1.0. And in every DEA assumptions the peer and lambda values were identical. 
+- The other observation we found out was about the efficiency at 1.0 - 
+In the CRS method got DMU[1:4] efficient at 1.0
+VRS method had DMU[1:5] efficient at 1.0
+IRS method had DMU[1:5] efficient at 1.0
+DRS method had DMU[1:4] efficient at 1.0
+- Most importantly all of the other less efficient DMUs had a Peer[1] and Peer [2] value of 1 and 2, but Peer[3] had a value of either 4 or 5. This was dependent on the method we used for the DEA assumption. 
+- The lambdas also known as relative weights for the same DMUs were extremely close to each other in every method.
+
+What we know about every Facility - 
+- Facilities 1,2,3 and 4 are fully efficient for all the assumptions and Facilities 5 and 6 are not efficient.
+- Facility 5 is fully efficient for FDH,VRS,IRS and FRH assumptions.
+- We can see that there is 97.7% efficiency for the CRS and DRS assumptions.
+- Facility 6 is fully efficient for the FDH and FRS assumptions.
+- For Facility 6, CRS and DRS assumptions are 86.7% efficient
+- Lastly, for Facility 6, IRS and VRS assumptions are 89.6% efficient. 
+
+
+
