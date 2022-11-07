@@ -1,0 +1,115 @@
+---
+title: "Assignment 5"
+author: "Tejasvini Mavuleti"
+date: "2022-11-06"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+Overview - The Research Division of the Emax Corporation developed three new products. Our goal is to maximize the profits generated from these three products and increase the profits from $75 million from this year. 
+
+The Objective Function is to Maximize Z(Profit) = P-6C-3D
+
+
+# 1 - Define the variables and use the goal proramming technique
+
+In this problem - the independent variables are 
+x1 = the number of units that are contributed to Product 1
+x2 = the number of units that are contributed to Product 2
+x3 = the number of units that are contributed to Product 3
+
+The dependent variables are 
+a. The employment level (y1) 
+
+Say y1 = 6x1 + 4x2+ 5x3 - 50, where y1>=0
+y1 here gives the difference between the number of employees working at a given point (5000) which will produce all the 3 types of products. This difference is unknown.
+
+b. The earnings for next year (y2)
+
+Here y2 = 8x1 + 7x2 +5x3 - 75, where y2>=0
+y2 is the difference between the earnings goal at $75 million and where it will be the maximum. If the number is less than $75 million it could be a loss.
+
+Therefore, 
+y1+ = the upper limit of the employment level 
+y1- = the lower limit of the employment level
+y2+ = the upper limit of the earnings next year
+y2- = the lower limit of the earnings next year
+
+Therefore the constraints are - 
+
+P = 20x1 +15x2 + 25x3
+6x1 +4x2 +5x3 + y1p - y2m = 50
+8x1 +7x2 +5x3 -y2p -y2m =75 
+
+
+# 2 - Management's objective function
+For the objective function we need to maximize the profit considering three factors that are given - total profit, stability in the workorce and acheiving an increase in the earninggs for next year. 
+
+Also, P = total (discounted) profit over the life of the new products.
+C = change (in either direction) in the current level of employment.
+D = decrease (if any) in next year’s earnings from the current year’s level.
+
+Z= 20x1 +15x2 +25x3 - 6y1m - 6y1p - 3y2m
+
+# 3 - Formulate and solving the linear programming model
+
+Max 20x1 +15x2 +25x3 -6y1p -6y1m -3y2m
+subject to
+6x1 + 4x2 + 5x3 - y1p - y1m = 50
+8x1 + 7x2 + 5x3 -y2p -y2m =75 
+x1, x2, x3, y1m, y1p, y2p, y2m >= 0 
+
+```{r}
+library(lpSolveAPI)
+library (ggplot2)
+goalprogram <- read.lp("C:/Users/mavul/OneDrive/Documents/Assignment 5 - Module 9 - Tejasvini Mavuleti.lp")
+print(goalprogram)
+```
+
+Getting the objective function and the variables
+
+```{r}
+solve(goalprogram)
+```
+
+```{r}
+table_goalprogram <- matrix(c("Total profit","Employment level","Earnings next year",
+                            20,6,8,
+                            15,4,7,
+                            25,5,5,
+                            "Maximize","=50",">=75",
+                            "Millions of Dollars","Hundreds of Employees","Millions of Dollars"), ncol=6, byrow= F) 
+colnames(table_goalprogram) <- c("Factor","Product 1","Product 2","Product 3", "Goal", "Units")
+as.table(table_goalprogram)
+```
+
+```{r}
+get.objective(goalprogram)
+```
+
+```{r}
+get.variables(goalprogram)
+```
+
+The results that we got show that there will be an optimal solution when 
+x1 = 0,x2 = 0, x3 = 15, y1p = 25, y1m = 0 y2p =0 and y2m =0. 
+
+
+We need to determine the required resources to achieve a desired set of objectives, the degree of attainment of the goals with the available resources and by providing the best satisfying solution under a varying amount of resources and priorities of the Emax corporation's goals. With this output, we can recommend Emax corporation and their R&D team to focus on Product type 3 and produce  at least 15 units to achieve the maximum profit of $225 million in the target period. 
+
+Therefore, if 15 units of Product 2 is produced, only 20 units of Product 1 can be produced. Emax needs to make sure that there is a constant balance in efficient production. In such cases, the only product that can be produced is product 3 instead of the other two.
+
+In terms of employment, there were more than 25000 employees at this point. If they have to increase production keeping the employment stability in mind, the maximum Emax can have is up to 5000. 
+
+The best optimal profit is 25 * 15 = $325 Million. 
+And when the number of employees which are 7500 is more than the optimal value and we need to make sure that ylp=25 and ylm = 0.
+If the next year earnings is #75 million, then y2m=y2p = 0.
+
+This could be the best possible way to attain maximum efficiency for Emax with all its 3 products and attain stability in employment. 
+
+
+
+
