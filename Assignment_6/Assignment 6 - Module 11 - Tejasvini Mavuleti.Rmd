@@ -1,0 +1,101 @@
+---
+title: "MIS 64018 - Assignment 6"
+author: "Tejasvini Mavuleti"
+date: "2022-11-16"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## INTEGER PROGRAMMING
+
+AP Shipping Hub has the following estimate number of workers needed each day of the week 
+
+```{r}
+WorkersRequied <- matrix(c("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday", "Saturday",18,27,22,26,25,21,19), nrow=7, ncol=2, byrow = FALSE)
+
+colnames(WorkersRequied) <- c("Day of the Week", "WorkersRequired")
+
+as.table(WorkersRequied)
+```
+
+# Objective function
+
+The objective function is 
+
+775x1 + 800x2 + 800x3 + 800x4 + 800x5 + 775x6 + 750x7 = MINIMIZE
+
+where:
+
+x1 = Workers Shift 1 (off Sunday Monday)
+x2 = Workers Shift 2 (off Monday Tuesday)
+x3 = Workers Shift 3 (off Tuesday Wednesday)
+x4 = Workers Shift 4 (off Wednesday Thursday)
+x5 = Workers Shift 5 (off Thursday Friday)
+x6 = Workers Shift 6 (off Friday Saturday)
+x7 = Workers Shift 7 (off Saturday Sunday)
+
+
+# Constraints
+
+x2 + x3 + x4 + x5 + x6 >= 18 (Sunday)
+x3 + x4 + x5 + x6 + x7 >= 27 (Monday)
+x1 + x4 + x5 + x6 + x7 >= 22 (Tuesday)
+x1 + x2 + x5 + x6 + x7 >= 26 (Wednesday)
+x1 + x2 + x3 + x6 + x7 >= 25 (Thursday)
+x1 + x2 + x3 + x4 + x7 >= 21 (Friday)
+x1 + x2 + x3 + x4 + x5 >= 19 (Saturday)
+ 
+ 
+
+# Q1. Formulate and solve the problem. 
+
+Solving the lp problem
+
+```{r}
+library(lpSolveAPI)
+lprec <- read.lp("64018 A6.lp")
+
+set.objfn(lprec, c(775, 800, 800, 800, 800, 775, 750))
+lp.control(lprec, sense = 'min')
+
+add.constraint(lprec, c(0,1,1,1,1,1,0), ">=", 18)
+add.constraint(lprec, c(0,0,1,1,1,1,1), ">=", 27)
+add.constraint(lprec, c(1,0,0,1,1,1,1), ">=", 22)
+add.constraint(lprec, c(1,1,0,0,1,1,1), ">=", 26)
+add.constraint(lprec, c(1,1,1,0,0,1,1), ">=", 25)
+add.constraint(lprec, c(1,1,1,1,0,0,1), ">=", 21)
+add.constraint(lprec, c(1,1,1,1,1,0,0), ">=", 19)
+
+print(lprec)
+
+solve(lprec)
+
+get.objective(lprec)
+
+get.variables(lprec)
+```
+
+# Q2. How many workers are available each day? 
+The following are the number of people available for work each day of the week
+
+x1 = 2  Workers Shift 1
+x2 = 4  Workers Shift 2
+x3 = 7  Workers Shift 3
+x4 = 0  Workers Shift 4
+x5 = 8  Workers Shift 5
+x6 = 1  Workers Shift 6
+x7 = 13 Workers Shift 7
+
+# Q3. What was the total cost?  
+With the above staffing schedule plan, we will arrive at a minimum cost of $25,675.
+
+# Conclusion
+We successfully employed 35 workers in total. Because the number of available workers each day can exceed, but can not be below the required amount. We made sure that we implement the following changes. In shift 7 we had employees off Saturday and Sunday and since we have 13 workers off for shift seven, we are left with 22 to cover. Saturday will include employees who work shifts 1, 2, 3, 4, and 5. This would include 21 employees. We see that Saturday needs a minimum of 19 so we are safe to have 13 on shift 7 and not working on this day. This logic can be applied to the other days and we will find that we have met the minimum staffing needs for each day. 
+This way we can make sure that we assign every worker their maximum feasible hours with the lowest wage expense. The objective is achieved!
+
+ 
+
